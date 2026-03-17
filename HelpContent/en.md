@@ -1,4 +1,4 @@
-# English(USA)
+# English
 
 ## CPR Score
 
