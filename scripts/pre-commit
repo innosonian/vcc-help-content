@@ -1,0 +1,24 @@
+#!/bin/sh
+
+echo "🔄 Checking for markdown files to convert..."
+
+# HelpContent 폴더 안의 모든 .md 파일 대상
+MD_FILES=$(find HelpContent -name "*.md")
+
+if [ -z "$MD_FILES" ]; then
+  echo "No markdown files found."
+  exit 0
+fi
+
+for MD_FILE in $MD_FILES; do
+  HTML_FILE="${MD_FILE%.md}.html"
+
+  # HTML 파일이 없거나, md가 html보다 최신인 경우에만 변환
+  if [ ! -f "$HTML_FILE" ] || [ "$MD_FILE" -nt "$HTML_FILE" ]; then
+    marked "$MD_FILE" -o "$HTML_FILE"
+    git add "$HTML_FILE"
+    echo "  ✓ $MD_FILE → $HTML_FILE"
+  fi
+done
+
+echo "✅ Done."
