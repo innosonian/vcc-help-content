@@ -2,22 +2,51 @@
 
 echo "🔄 Checking for markdown files to convert..."
 
-# HelpContent 폴더 안의 모든 .md 파일 대상
-MD_FILES=$(find HelpContent -name "*.md")
+# 레포 루트를 기준으로 경로 설정 (실행 위치와 무관하게 항상 정확)
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+CSS_FILE="$REPO_ROOT/scripts/help-style.css"
+MD_FILES=$(find "$REPO_ROOT/HelpContent" -name "*.md")
 
 if [ -z "$MD_FILES" ]; then
   echo "No markdown files found."
   exit 0
 fi
 
+# CSS 파일 존재 여부 확인
+if [ ! -f "$CSS_FILE" ]; then
+  echo "❌ CSS file not found: $CSS_FILE"
+  exit 1
+fi
+
 for MD_FILE in $MD_FILES; do
   HTML_FILE="${MD_FILE%.md}.html"
 
-  # HTML 파일이 없거나, md가 html보다 최신인 경우에만 변환
   if [ ! -f "$HTML_FILE" ] || [ "$MD_FILE" -nt "$HTML_FILE" ]; then
-    marked "$MD_FILE" -o "$HTML_FILE"
+
+    BODY=$(marked "$MD_FILE")
+    BODY=$(echo "$BODY" | sed 's|<table>|<div class="table-wrapper"><table>|g')
+    BODY=$(echo "$BODY" | sed 's|</table>|</table></div>|g')
+    CSS=$(cat "$CSS_FILE")
+    LANG=$(basename "$MD_FILE" .md)
+
+    cat > "$HTML_FILE" << HTMLEOF
+<!DOCTYPE html>
+<html lang="${LANG}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>
+${CSS}
+  </style>
+</head>
+<body>
+${BODY}
+</body>
+</html>
+HTMLEOF
+
     git add "$HTML_FILE"
-    echo "  ✓ $MD_FILE → $HTML_FILE"
+    echo "  ✓ $(basename $MD_FILE) → $(basename $HTML_FILE)"
   fi
 done
 
