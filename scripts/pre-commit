@@ -23,27 +23,57 @@ fi
 
 STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
 
-if [ -z "$STAGED_FILES" ]; then
-  echo "No staged files detected."
-  exit 0
-fi
+if [ "$#" -gt 0 ]; then
+  MD_RELATIVE_FILES=""
+  for TARGET_PATH in "$@"; do
+    case "$TARGET_PATH" in
+      "$REPO_ROOT"/*)
+        RELATIVE_PATH="${TARGET_PATH#"$REPO_ROOT"/}"
+        ;;
+      *)
+        RELATIVE_PATH="$TARGET_PATH"
+        ;;
+    esac
 
-CSS_CHANGED=0
-if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/help-style\.css$'; then
-  CSS_CHANGED=1
-fi
+    if [ ! -f "$REPO_ROOT/$RELATIVE_PATH" ]; then
+      echo "❌ Markdown file not found: $TARGET_PATH"
+      exit 1
+    fi
 
-CHANGED_MD_FILES="$(printf '%s\n' "$STAGED_FILES" | grep -E '^HelpContent/.*\.md$' || true)"
-
-if [ "$CSS_CHANGED" -eq 1 ]; then
-  MD_RELATIVE_FILES="$(find "$REPO_ROOT/HelpContent" -type f -name '*.md' | LC_ALL=C sort | sed "s#^$REPO_ROOT/##")"
+    case "$RELATIVE_PATH" in
+      HelpContent/*.md)
+        MD_RELATIVE_FILES="${MD_RELATIVE_FILES}${MD_RELATIVE_FILES:+
+}$RELATIVE_PATH"
+        ;;
+      *)
+        echo "❌ Only HelpContent/*.md files can be generated directly: $TARGET_PATH"
+        exit 1
+        ;;
+    esac
+  done
 else
-  MD_RELATIVE_FILES="$CHANGED_MD_FILES"
-fi
+  if [ -z "$STAGED_FILES" ]; then
+    echo "No staged files detected."
+    exit 0
+  fi
 
-if [ -z "$MD_RELATIVE_FILES" ]; then
-  echo "No markdown or style changes detected."
-  exit 0
+  CSS_CHANGED=0
+  if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/help-style\.css$'; then
+    CSS_CHANGED=1
+  fi
+
+  CHANGED_MD_FILES="$(printf '%s\n' "$STAGED_FILES" | grep -E '^HelpContent/.*\.md$' || true)"
+
+  if [ "$CSS_CHANGED" -eq 1 ]; then
+    MD_RELATIVE_FILES="$(find "$REPO_ROOT/HelpContent" -type f -name '*.md' | LC_ALL=C sort | sed "s#^$REPO_ROOT/##")"
+  else
+    MD_RELATIVE_FILES="$CHANGED_MD_FILES"
+  fi
+
+  if [ -z "$MD_RELATIVE_FILES" ]; then
+    echo "No markdown or style changes detected."
+    exit 0
+  fi
 fi
 
 OLD_IFS=$IFS
