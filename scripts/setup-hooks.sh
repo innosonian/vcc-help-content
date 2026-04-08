@@ -1,11 +1,17 @@
 #!/bin/sh
+set -eu
 
-# hooks 폴더가 없으면 생성
-if [ ! -d ".git/hooks" ]; then
-  mkdir -p .git/hooks
-  echo "📁 Created .git/hooks directory."
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+HOOKS_DIR="$REPO_ROOT/.githooks"
+HOOK_FILE="$HOOKS_DIR/pre-commit"
+
+if [ ! -f "$HOOK_FILE" ]; then
+  echo "❌ Hook file not found: $HOOK_FILE"
+  exit 1
 fi
 
-cp scripts/pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+chmod +x "$HOOK_FILE" "$REPO_ROOT/scripts/pre-commit"
+git config --local core.hooksPath "$HOOKS_DIR"
+
 echo "✅ Git hook installed successfully."
+echo "   core.hooksPath -> $HOOKS_DIR"

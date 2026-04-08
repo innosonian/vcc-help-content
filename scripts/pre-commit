@@ -1,35 +1,67 @@
 #!/bin/sh
+set -eu
 
 echo "🔄 Checking for markdown files to convert..."
 
-# 레포 루트를 기준으로 경로 설정 (실행 위치와 무관하게 항상 정확)
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 CSS_FILE="$REPO_ROOT/scripts/help-style.css"
-MD_FILES=$(find "$REPO_ROOT/HelpContent" -name "*.md")
 
-if [ -z "$MD_FILES" ]; then
-  echo "No markdown files found."
-  exit 0
-fi
-
-# CSS 파일 존재 여부 확인
 if [ ! -f "$CSS_FILE" ]; then
   echo "❌ CSS file not found: $CSS_FILE"
   exit 1
 fi
 
-for MD_FILE in $MD_FILES; do
+if [ -x "$REPO_ROOT/node_modules/.bin/marked" ]; then
+  MARKED_BIN="$REPO_ROOT/node_modules/.bin/marked"
+elif command -v marked >/dev/null 2>&1; then
+  MARKED_BIN="$(command -v marked)"
+else
+  echo "❌ 'marked' command not found."
+  echo "   Install it with 'npm install -g marked'."
+  exit 1
+fi
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "No staged files detected."
+  exit 0
+fi
+
+CSS_CHANGED=0
+if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/help-style\.css$'; then
+  CSS_CHANGED=1
+fi
+
+CHANGED_MD_FILES="$(printf '%s\n' "$STAGED_FILES" | grep -E '^HelpContent/.*\.md$' || true)"
+
+if [ "$CSS_CHANGED" -eq 1 ]; then
+  MD_RELATIVE_FILES="$(find "$REPO_ROOT/HelpContent" -type f -name '*.md' | LC_ALL=C sort | sed "s#^$REPO_ROOT/##")"
+else
+  MD_RELATIVE_FILES="$CHANGED_MD_FILES"
+fi
+
+if [ -z "$MD_RELATIVE_FILES" ]; then
+  echo "No markdown or style changes detected."
+  exit 0
+fi
+
+OLD_IFS=$IFS
+IFS='
+'
+
+for RELATIVE_PATH in $MD_RELATIVE_FILES; do
+  [ -n "$RELATIVE_PATH" ] || continue
+
+  MD_FILE="$REPO_ROOT/$RELATIVE_PATH"
   HTML_FILE="${MD_FILE%.md}.html"
+  TMP_FILE="${HTML_FILE}.tmp"
+  LANG="$(basename "$MD_FILE" .md)"
+  BODY="$("$MARKED_BIN" "$MD_FILE")"
+  BODY="$(printf '%s\n' "$BODY" | sed 's|<table>|<div class="table-wrapper"><table>|g; s|</table>|</table></div>|g')"
+  CSS="$(cat "$CSS_FILE")"
 
-  if [ ! -f "$HTML_FILE" ] || [ "$MD_FILE" -nt "$HTML_FILE" ]; then
-
-    BODY=$(marked "$MD_FILE")
-    BODY=$(echo "$BODY" | sed 's|<table>|<div class="table-wrapper"><table>|g')
-    BODY=$(echo "$BODY" | sed 's|</table>|</table></div>|g')
-    CSS=$(cat "$CSS_FILE")
-    LANG=$(basename "$MD_FILE" .md)
-
-    cat > "$HTML_FILE" << HTMLEOF
+  cat > "$TMP_FILE" <<HTMLEOF
 <!DOCTYPE html>
 <html lang="${LANG}">
 <head>
@@ -45,9 +77,11 @@ ${BODY}
 </html>
 HTMLEOF
 
-    git add "$HTML_FILE"
-    echo "  ✓ $(basename $MD_FILE) → $(basename $HTML_FILE)"
-  fi
+  mv "$TMP_FILE" "$HTML_FILE"
+  git add "$HTML_FILE"
+  echo "  ✓ $(basename "$MD_FILE") → $(basename "$HTML_FILE")"
 done
+
+IFS=$OLD_IFS
 
 echo "✅ Done."

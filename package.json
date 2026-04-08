@@ -1,0 +1,7 @@
+{
+  "name": "vcc-help-content",
+  "private": true,
+  "devDependencies": {
+    "marked": "^18.0.0"
+  }
+}
