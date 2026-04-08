@@ -15,9 +15,6 @@
 | **Ventilation Rate** | The number of ventilations delivered per minute. | Measured in breaths per minute (bpm). **AHA** and **ERC** recommend **10-12 bpm for adults**. |
 | **Ventilation Volume** | The amount of air delivered per ventilation. | Measured in volume per breath. Guidelines recommend **approximately 400–600 mL** per breath (AHA, ARC 2020). |
 | **Ventilation Pressure** | The speed at which air is delivered during ventilation. | Measured in liters per second (L/s). Ensuring proper delivery speed prevents lung overexpansion and barotrauma. |
-| Rescue Volume | The amount of air delivered before the CPR session, according to the ERC guidelines. | Measured in volume per breath(mL). **Approximately 200–300 mL** for child and **approximately 30-50 mL** for infants(ERC). |
-| Rescue Count | Total number of rescue breaths delivered before CPR sessions, according to the ERC guidelines. | Measured as a count. **Fewer than 5** is considered '**too few'**, and **more than 5** is '**too many**'.(ERC) |
-| Rescue Speed | The speed at which air is delivered before the CPR session, according to the ERC guidelines. | Measured in liters per second (L/s). Ensuring proper speed prevents lung overexpansion and barotrauma. |
 
 ## CPR Metrics
 
