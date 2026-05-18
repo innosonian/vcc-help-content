@@ -6,7 +6,7 @@
 | **Compression Rate** | The number of compressions performed per minute. | Measured in compressions per minute; optimal range is **100-120/min** according to ARC 2025 guidelines. |
 | **Recoil** | The extent to which the chest fully recoils after each compression. | Measured as a percentage of full recoil; 100% recoil is ideal. |
 | **Hand Position** | The placement of hands on the chest during compressions. | Assessed by checking alignment with the sternum’s center. |
-| **Hand-off Time** | The time spent without performing chest compressions. | Measured in seconds; minimizing this time improves CPR effectiveness.  |
+| **Hands-off Time** | The time spent without performing chest compressions. | Measured in seconds; minimizing this time improves CPR effectiveness.  |
 | **CCF (Chest Compression Fraction)** | The percentage of CPR time spent delivering chest compressions. | Expressed as a percentage of total CPR duration. Higher values correlate with better outcomes. |
 | **Compression Count** | The total number of compressions performed during a CPR session. | Measured as a count of individual compressions performed. For example, in a **30:2 guideline**, performing **31+ compressions** results in 'too many', while fewer than 30 is 'too few'. |
 | **Ventilation Count** | The total number of rescue breaths given during a CPR session. | Measured as a count of individual breaths delivered. For a **30:2 guideline**, providing **fewer than 2 ventilations** is 'too few', and more than 2 is 'too many'. |
