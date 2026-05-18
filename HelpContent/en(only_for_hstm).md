@@ -1,6 +1,4 @@
-# English(USA)
-
-## CPR Score
+# CPR Score
 
 | **Term Name** | **Definition** | **How It’s Measured** |
 | --- | --- | --- |
@@ -16,7 +14,7 @@
 | **Ventilation Volume** | The amount of air delivered per ventilation. | Measured in volume per breath. Guidelines recommend **approximately 400–600 mL** per breath (ARC 2025). |
 | **Ventilation Pressure** | The speed at which air is delivered during ventilation. | Measured in liters per second (L/s). Ensuring proper delivery speed prevents lung overexpansion and barotrauma. |
 
-## CPR Metrics
+# CPR Metrics
 
 | **Metric Name** | **Definition** | **Why It Matters** | **How It’s Measured** |
 | --- | --- | --- | --- |
